@@ -137,6 +137,8 @@ class SplatfactoModelConfig(ModelConfig):
     loss from the PhysGaussian paper
     """
     output_depth_during_training: bool = False
+    use_depth_regularization: bool = False
+    depth_loss_weight: float = 1.0
     """If True, output depth during training. Otherwise, only output depth during evaluation."""
     rasterize_mode: Literal["classic", "antialiased"] = "classic"
     """
@@ -241,6 +243,7 @@ class SplatfactoModel(Model):
         self.psnr = PeakSignalNoiseRatio(data_range=1.0)
         self.ssim = SSIM(data_range=1.0, size_average=True, channel=3)
         self.lpips = LearnedPerceptualImagePatchSimilarity(normalize=True)
+        self.L1 = torch.nn.L1Loss()
         self.step = 0
 
         self.crop_box: Optional[OrientedBox] = None
@@ -646,6 +649,8 @@ class SplatfactoModel(Model):
 
         metrics_dict["gaussian_count"] = self.num_points
 
+        if self.config.use_depth_regularization:
+            metrics_dict["depth_loss"] = self.L1(outputs["depth"], batch["depth"])
         self.camera_optimizer.get_metrics_dict(metrics_dict)
         return metrics_dict
 

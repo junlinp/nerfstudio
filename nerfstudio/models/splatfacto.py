@@ -659,7 +659,9 @@ class SplatfactoModel(Model):
         metrics_dict["gaussian_count"] = self.num_points
 
         if self.config.use_depth_regularization:
-            metrics_dict["depth_loss"] = self.L1(outputs["depth"], self.get_gt_depth(batch["depth_image"]))
+            gt_depth = self.get_gt_depth(batch["depth_image"])
+            mask = gt_depth > 0.1
+            metrics_dict["depth_loss"] = self.L1(outputs["depth"][mask], gt_depth[mask])
         self.camera_optimizer.get_metrics_dict(metrics_dict)
         return metrics_dict
 

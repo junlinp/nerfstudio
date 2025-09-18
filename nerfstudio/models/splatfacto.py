@@ -618,6 +618,15 @@ class SplatfactoModel(Model):
         gt_img = self._downscale_if_required(image)
         return gt_img.to(self.device)
 
+    def get_gt_depth(self, depth: torch.Tensor):
+        """Compute groundtruth depth with iteration dependent downscale factor for evaluation purpose
+
+        Args:
+            depth: tensor.Tensor in type float32
+        """
+        gt_depth = self._downscale_if_required(depth)
+        return gt_depth.to(self.device)
+
     def composite_with_background(self, image, background) -> torch.Tensor:
         """Composite the ground truth image with a background color when it has an alpha channel.
 
@@ -650,7 +659,7 @@ class SplatfactoModel(Model):
         metrics_dict["gaussian_count"] = self.num_points
 
         if self.config.use_depth_regularization:
-            metrics_dict["depth_loss"] = self.L1(outputs["depth"], batch["depth_image"])
+            metrics_dict["depth_loss"] = self.L1(outputs["depth"], self.get_gt_depth(batch["depth_image"]))
         self.camera_optimizer.get_metrics_dict(metrics_dict)
         return metrics_dict
 
@@ -715,6 +724,7 @@ class SplatfactoModel(Model):
             # Add depth regularization loss
             if self.config.use_depth_regularization and metrics_dict is not None and "depth_loss" in metrics_dict:
                 loss_dict["depth_loss"] = self.config.depth_loss_weight * metrics_dict["depth_loss"]
+                loss_dict["main_loss"] += loss_dict["depth_loss"]
 
         return loss_dict
 

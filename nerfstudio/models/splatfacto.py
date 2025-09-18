@@ -138,7 +138,7 @@ class SplatfactoModelConfig(ModelConfig):
     """
     output_depth_during_training: bool = False
     use_depth_regularization: bool = False
-    depth_loss_weight: float = 1.0
+    depth_loss_weight: float = 0.5
     """If True, output depth during training. Otherwise, only output depth during evaluation."""
     rasterize_mode: Literal["classic", "antialiased"] = "classic"
     """
@@ -726,7 +726,6 @@ class SplatfactoModel(Model):
             # Add depth regularization loss
             if self.config.use_depth_regularization and metrics_dict is not None and "depth_loss" in metrics_dict:
                 loss_dict["depth_loss"] = self.config.depth_loss_weight * metrics_dict["depth_loss"]
-                loss_dict["main_loss"] += loss_dict["depth_loss"]
 
         return loss_dict
 

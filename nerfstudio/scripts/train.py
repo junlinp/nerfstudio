@@ -96,9 +96,7 @@ def train_loop(local_rank: int, world_size: int, config: TrainerConfig, global_r
         config: config file specifying training regimen
     """
     _set_random_seed(config.machine.seed + global_rank)
-    print(f"TrainerConfig: {config}")
     trainer = config.setup(local_rank=local_rank, world_size=world_size)
-    print(f"Trainer: {trainer}")
     trainer.setup()
     trainer.train()
 

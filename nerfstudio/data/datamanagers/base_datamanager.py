@@ -53,6 +53,7 @@ from nerfstudio.configs.dataparser_configs import AnnotatedDataParserUnion
 from nerfstudio.data.dataparsers.base_dataparser import DataparserOutputs
 from nerfstudio.data.dataparsers.blender_dataparser import BlenderDataParserConfig
 from nerfstudio.data.datasets.base_dataset import InputDataset
+from nerfstudio.data.datasets.depth_dataset import DepthDataset
 from nerfstudio.data.pixel_samplers import PatchPixelSamplerConfig, PixelSampler, PixelSamplerConfig
 from nerfstudio.data.utils.dataloaders import (
     CacheDataloader,
@@ -329,7 +330,7 @@ class VanillaDataManagerConfig(DataManagerConfig):
             warnings.warn("above message coming from", FutureWarning, stacklevel=3)
 
 
-TDataset = TypeVar("TDataset", bound=InputDataset, default=InputDataset)
+TDataset = TypeVar("TDataset", bound=InputDataset, default=DepthDataset)
 
 
 class VanillaDataManager(DataManager, Generic[TDataset]):

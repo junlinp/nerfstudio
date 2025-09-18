@@ -650,7 +650,7 @@ class SplatfactoModel(Model):
         metrics_dict["gaussian_count"] = self.num_points
 
         if self.config.use_depth_regularization:
-            metrics_dict["depth_loss"] = self.L1(outputs["depth"], batch["depth"])
+            metrics_dict["depth_loss"] = self.L1(outputs["depth"], batch["depth_image"])
         self.camera_optimizer.get_metrics_dict(metrics_dict)
         return metrics_dict
 
@@ -711,6 +711,10 @@ class SplatfactoModel(Model):
             self.camera_optimizer.get_loss_dict(loss_dict)
             if self.config.use_bilateral_grid:
                 loss_dict["tv_loss"] = 10 * total_variation_loss(self.bil_grids.grids)
+            
+            # Add depth regularization loss
+            if self.config.use_depth_regularization and metrics_dict is not None and "depth_loss" in metrics_dict:
+                loss_dict["depth_loss"] = self.config.depth_loss_weight * metrics_dict["depth_loss"]
 
         return loss_dict
 
